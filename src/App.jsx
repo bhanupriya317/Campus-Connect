@@ -12,9 +12,10 @@ import EventDetailsPage from "./pages/EventDetailsPage";
 import AboutPage from "./pages/AboutPage";
 
 
-
 function App() {
     const [events, setEvents] = useState([]);
+    const [editingEvent, setEditingEvent] = useState(null);
+
     useEffect(()=>{
         fetch("http://localhost:5006/api/events")
         .then((response)=>response.json())
@@ -24,26 +25,12 @@ function App() {
     }, []);
 
     function handleAddEvent(newEvent) {
-        fetch("http://localhost:5006/api/events",{
+        fetch("http://localhost:5006/api/events", {
             method:"POST",
             headers:{
-                "Content-Type":"application/json"          
+                "Content-Type":"application/json"
             },
-            body:JSON.stringify(newEvent)
-        }).then((response)=>response.json)
-        .then((data)=>{
-            console.log(data);
-            fetch("http://localhost:5006/api/events")
-            .then((response)=>response.json())
-            .then((data)=>{
-                setEvents(data);
-            });
-        });
-    }
-
-    function handleDeleteEvent(eventId) {
-        fetch('http://localhost:5006/api/events/${eventId}',{
-            method:"DELETE"
+            body: JSON.stringify(newEvent)
         }).then((response)=>response.json())
         .then((data)=>{
             console.log(data);
@@ -55,6 +42,47 @@ function App() {
         });
     }
 
+    function handleDeleteEvent(eventId) {
+        fetch(`http://localhost:5006/api/events/${eventId}`, {
+            method: "DELETE"
+        }).then((response)=>response.json())
+        .then((data)=>{
+            console.log(data);
+            fetch("http://localhost:5006/api/events")
+            .then((response)=>response.json())
+            .then((data)=>{
+                setEvents(data);
+            });
+        });
+    }
+
+    function handleEditEvent(eventId){
+        const selectedEvent = events.find(function(event){
+            return event.id === eventId;
+        });
+        setEditingEvent(selectedEvent);
+    }
+
+    function handleUpdateEvent(updatedEvent) {
+        fetch(`http://localhost:5006/api/events/${updatedEvent.id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(updatedEvent)
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            console.log(data);
+
+            fetch("http://localhost:5006/api/events")
+                .then((response) => response.json())
+                .then((data) => {
+                    setEvents(data);
+                    setEditingEvent(null);
+                });
+        });
+    }
 
     return (
         <div>
@@ -68,6 +96,9 @@ function App() {
                             events={events}
                             onAddEvent={handleAddEvent}
                             onDeleteEvent={handleDeleteEvent}
+                            onEditEvent={handleEditEvent}
+                            editingEvent={editingEvent}
+                            onUpdateEvent={handleUpdateEvent}
                         />
                     }
                 />

@@ -1,6 +1,5 @@
 import EventSection from "../components/EventSection";
 
-
 function EventsPage({ events, onDeleteEvent }) {
     
     return (
